@@ -9,6 +9,11 @@ sim_rides <- function(N, p){
   sample(c("L", "O"), size=N, replace=TRUE, prob=c(p, 1-p)) 
 }
 
+#store observations
+observations <- sim_rides(10,0.5)
+#get relative number of rides that are late
+sum(observations == "L")/length(observations)
+
 
 
 # R 3.2.2 Statistical model (estimator)
@@ -23,6 +28,9 @@ compute_post <- function(obs, poss){
 }
 data <- c("L", "O", "L")
 compute_post(obs = data, poss=seq(0,1,.25))
+
+obs <- sim_rides(10,0.1)
+compute_post(obs = obs, poss=seq(0,1,.25))
 
 
 # R 3.2.3 Integrate prior knowledge
