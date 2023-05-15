@@ -47,7 +47,7 @@ both$sum <- both$d1 + both$d2
 #tasknumber 5
 # 5. Compute the probability that the sum is ≥ 7 , given the first dice shows 3. (2 points)
 
-sumge7 <- filter(both,sum>=7)        # subset of the data where sum >= 7
+sumge7 <- filter(both,sum>=7 & d1==3)        # subset of the data where sum >= 7
 p_sumge7 <- nrow(sumge7)/nrow(both)  # compute probability
 p_sumge7
 
@@ -57,12 +57,14 @@ p_sumge7
 
 sumbtw4n9 <- filter(both,4<sum & sum<9) # subset of the data where sum lies between 4 and 9 (excluding 4 and 9)
 p_sumbtw4n9 <- nrow(sumbtw4n9)/nrow(both)
+p_sumbtw4n9
 
 
 #tasknumber 7
 # 7. What is the probability of the most probable sum? (2 points)
 
 p_sum_mostprob <- sort(prop.table(table(both$sum)), decreasing=T)[1]
+p_sum_mostprob
 
 # table(both$sum) counts occurrence of each possible value in both$sum
 # prop.table(...) calculates the value of each cell in the occurrence table as a proportion of all occurrences (which are here the probabilities)
@@ -81,17 +83,20 @@ p_sum_mostprob <- sort(prop.table(table(both$sum)), decreasing=T)[1]
 # numbers of delay and rows are the possible probabilities of delay (or vice versa).
 
 probabilities <- seq(0,1,0.1)                                                             # possible probabilities of delay
-prob_distr <- data.frame(matrix(nrow = 10, ncol = length(probabilities)))                 # create empty data frame
+prob_distr <- data.frame(matrix(nrow = 11, ncol = length(probabilities)))                 # create empty data frame
 colnames(prob_distr) <- c("0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1")  # rename columns
 
 # rows are possible numbers of delays
-for(i in 1:10){
+for(i in 0:10){
   # columns are possible probabilities of delay
   for(j in 1:length(probabilities)){
     # compute probability distribution and store in data frame
-    prob_distr[i,j] <- dbinom(x=i, size=10, prob=probabilities[j])
+    k = i+1
+    prob_distr[k,j] <- dbinom(x=i, size=10, prob=probabilities[j])
   }
 }
+# change row names
+row.names(prob_distr) <- seq(0,10,1)
 
 
 #tasknumber 9
@@ -112,8 +117,8 @@ likelihood <- data.frame(matrix(nrow = 1, ncol = length(probabilities)))        
 colnames(likelihood) <- c("0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1")  # rename columns
 
 # compute the likelihood of the data
-for(i in 1:length(probabilities)){
-  likelihood[,i] <- dbinom(x=sum(obs == "L"), size=10, prob=probabilities[i])
+for(j in 1:length(probabilities)){
+  likelihood[,j] <- dbinom(x=sum(obs == "L"), size=length(obs), prob=probabilities[j])
 }
 
 #tasknumber 10
@@ -126,7 +131,6 @@ prior <- c(0.000, 0.004, 0.041, 0.123, 0.209, 0.246, 0.209, 0.123, 0.041, 0.004,
 # prior probabilities have been computed with: 10 sided dice since length(probabilities) = 11
 
 posterior <- likelihood * prior
-
 
 
 
