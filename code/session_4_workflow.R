@@ -22,10 +22,10 @@ ggplot(UNI, aes(x = range, y = d)) +
 ## normal distribution 
 
 # create density distributions
-x_min <- -5
-x_max <- 5
+x_min <- -50
+x_max <- 50
 range <- seq(x_min, x_max, length.out = 100) # range
-d <- dnorm(range, mean = 0, sd = 1) # densities
+d <- dnorm(range, mean = 10, sd = 3) # densities
 NORM <- data.frame(range, d)
 
 # plot 
@@ -40,7 +40,7 @@ ggplot(NORM, aes(x = range, y = d)) +
 
 # create density distributions
 range <- seq(0, 1, length.out = 100)
-d <- dbeta(range, shape1 = 3, shape2 = 2)
+d <- dbeta(range, shape1 = 2, shape2 = 5)
 BETA <- data.frame(range, d)
 
 # plot

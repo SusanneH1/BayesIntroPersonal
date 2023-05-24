@@ -1,6 +1,14 @@
 # load packages
 pacman::p_load(tidyverse, rethinking)
 
+pacman::p_load('Rlab')
+
+# Exercise: Summing up random fluctuations
+
+hist(replicate(1000,sum(rnorm(1000,mean=0,sd=1)))) #normal distribution
+hist(replicate(1000,sum(rbern(1000,prob=0.5))))         #bernoulli
+hist(replicate(1000,sum(rbeta(1000,shape1=2,shape2=2))))         #beta
+
 
 # Gaussian model of Shaq's NBA points ----------------------------------------------------------
 
