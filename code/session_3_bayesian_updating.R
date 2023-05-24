@@ -30,6 +30,7 @@ data <- c("L", "O", "L")
 compute_post(obs = data, poss=seq(0,1,.25))
 
 obs <- sim_rides(10,0.1)
+sum(obs=="L")
 compute_post(obs = obs, poss=seq(0,1,.25))
 
 
