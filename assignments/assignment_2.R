@@ -1,4 +1,4 @@
-# Assignment 1
+# Assignment 2
 # Susanne Hantke
 # Matriculation number: 03751129
 
@@ -10,77 +10,116 @@ library(tidyverse)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
 # Bayesian Updating
+## tasknumber 1
 
-#tasknumber 1
-
-# Customer satisfaction:
-# P(S|A) = 0.7
-p_satisfied_when_A = 0.7
-# P(S|B) = 0.5
-p_satisfied_when_B = 0.5
-# P(S|C) = 0.8
-p_satisfied_when_C = 0.8
-# Prior:
-# B twice as likely as A and as C
-# P(A) = 1/(2+1+1) = 0.25
-p_A = 1/(2+1+1)
-# P(B) = 2/(2+1+1) = 0.5
-p_B = 2/(2+1+1)
-# P(C) = 1/(2+1+1) = 0.25
-p_C = 1/(2+1+1)
-# 10 reviews:
-# 6 positive, 4 negative
-# P(S) = 0.6
-p_satisfied = 0.6*(p_A+p_B+p_C)
-# Posterior probability that the reviews are on A:
-# P(A|S) = P(S|A)*P(A)/P(S) = 0.7*0.25/0.6 = 0.29 q.e.d
-p_A_when_0.6satisfied = p_satisfied_when_A * p_A / p_satisfied
-p_B_when_0.6satisfied = p_satisfied_when_B * p_B / p_satisfied
-p_C_when_0.6satisfied = p_satisfied_when_C * p_C / p_satisfied
-p_A_when_0.6satisfied
-
-# Nenner für P(H|E): P(H)*P(E|H)+P(-H)*P(E|-H)
-# P(S) = P(A)*P(S|A)+P(-A)*P(S|-A)
-# 0.25*0.7+(1-0.25)* ??
-
-p_A_when_0.9satisfied+p_B_when_0.9satisfied+p_C_when_0.9satisfied
-
-#tasknumber 2 ??
-
-# Posterior probability that the reviews are on C considering only the first 10 reviews:
-# P(C|S) = P(S|C)*P(C)/P(S) = 0.8*0.25/0.6 = 0.33
-print('Posterior probability that company C received the reviews considering only the first 10 reviews:')
-p_C_when_0.6satisfied
-# -> increase by 33 percentage points: p_C_when_0.9satisfied = 0.66 !
- 
-# 10 further reviews, 9 positive:
-# New prior probability is old posterior
-# P(S) = 0.9
-p_satisfied2 = 0.9*(p_A_when_0.6satisfied+p_B_when_0.6satisfied+p_C_when_0.6satisfied)
-p_C_when_0.9satisfied = p_satisfied_when_C * p_C_when_0.6satisfied / p_satisfied2
-p_C_when_0.9satisfied
-p_A_when_0.9satisfied = p_satisfied_when_A * p_A_when_0.6satisfied / p_satisfied2
-p_B_when_0.9satisfied = p_satisfied_when_B * p_B_when_0.6satisfied / p_satisfied2
+likelihood <- dbinom(6, 10, c(.7,.5,.8))
+prior <- c(1/3, 2/3, 1/3) # B receives reviews twice as likely as A and C
+posteriors <- prior * likelihood / sum(prior * likelihood)
+# Posterior probability that the reviews are on Company A
+posteriors[1]
 
 
-#tasknumber 3
+
+## tasknumber 2
+
+likelihood2 <- dbinom(9, 10, c(.7,.5,.8)) # only consider the last 10 reviews
+prior2 <- posteriors # new prior is old posterior
+posteriors2 <- prior2 * likelihood2 / sum(prior2 * likelihood2)
+# C increase by 33 percentage points
+posteriors2[3] - posteriors[3]
+
+
+
+## tasknumber 3
 
 # Factory receives equally many shipments from factory A and B:
-p_A = 0.5
-p_B = 0.5
+prior3 <- c(0.5,0.5)
 # Shipment entailing defective parts:
 # from factory A: 10% of the time
-p_defect_when_A = 0.1
 # from factory B: 20% of the time
-p_defect_when_B = 0.2
-# Received shipment contains defective parts
-p_defect = 1
-p_A_when_defect = p_defect_when_A * p_A / p_defect
-p_B_when_defect = p_defect_when_B * p_B / p_defect
-# What is the probability that the next shipment from the company will also contain defective products?
+# Received shipment contains defective parts (1 out of 1 shipments)
+likelihood3 <- dbinom(1,1,c(0.1,0.2))
+posteriors3 <- prior3 * likelihood3 / sum(prior3 * likelihood3)
+posteriors3
+# What is the probability that the next shipment from the same factory will also contain defective products?
+# error rate of A * likelihood that first shipment from A +  error rate of B * likelihood that first shipment from B
+sum(c(0.1,0.2) * posteriors3)
 
-# shipment FROM the COMPANY = shipment TO the COMPANY or shipment FROM the FACTORY
 
+## tasknumber 5
+
+# Same number of shipments from A and B -> P_A = P_B = 0.5
+# A is correctly identified: 0.8
+# B is correctly identified: 0.65
+# Test positive for A
+
+# Probability that the shipment is from A given the test says it is from A
+# P_A_given_Apos = P_Apos_given_A * P_A / (P_Apos_given_A * P_A + P_Apos_given_B * P_B)
+P_A_given_Apos = 0.8*0.5 / (0.8*0.5 + (1-0.65)*0.5)
+P_A_given_Apos
+
+# Defected products and positive test for A
+# prior5 <- posteriors3
+# P_A2 = posterior3[1] = 1/3 
+# P_B2 = posterior3[2] = 2/3
+P_A_given_Apos_and_defective = 0.8*(1/3) / (0.8*(1/3) + (1-0.65)*(2/3))
+P_A_given_Apos_and_defective
+
+
+# Bayesian Workflow
+## tasknumber 6
+
+## beta distribution
+# create density distribution
+range <- seq(0, 1, length.out = 100)
+d <- dbeta(range, shape1 = 2, shape2 = 4)
+BETA <- data.frame(range, d)
+
+# plot
+ggplot(BETA, aes(x = range, y = d)) +
+  geom_line(linewidth = 2) +
+  labs(x = "Proportion of land", 
+       y = "Density") +
+  theme_minimal()
+
+# 2/3 of the earth's surface are water -> 1/3 land
+# Peak of distribution at x = 1/3
+
+## tasknumber 7
+
+sample <- rbeta(1e4,2,4)
+
+
+## tasknumber 8
+
+prop <- seq(0, 1, length.out = 12)
+priors <- vector("numeric", length(prop))
+
+for (i in seq_along(prop)){
+  priors[i] <- round( sum(sample >= prop[i] & sample < prop[i+1]) / 1e4 , 2)
+}
+
+poss <- tibble(prop_L = seq(0, 1, .1), prior = priors[1:11])
+
+# 26 out of 100 tosses landed on land
+likelihood <- dbinom(26, 100, poss$prop_L)
+posteriors <- likelihood * poss$prior / sum(likelihood * poss$prior)
+poss$posterior <- posteriors
+poss
+
+
+## tasknumber 9
+
+samples_posterior <- sample(c(poss$prop_L),1e3,replace=TRUE,prob=c(poss$posterior))
+
+
+## tasknumber 10
+
+# Predict outcomes of 100 globe tosses
+prediction <- rbinom(length(samples_posterior),100,samples_posterior)
+
+hist(prediction,breaks=seq(-0.5,100.5),xlab="Number of lands",main="Posterior predictive distribution")
 
 
