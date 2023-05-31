@@ -12,6 +12,7 @@ library(tidyverse)
 
 
 # Bayesian Updating
+
 ## tasknumber 1
 
 likelihood <- dbinom(6, 10, c(.7,.5,.8))
@@ -48,6 +49,13 @@ posteriors3
 sum(c(0.1,0.2) * posteriors3)
 
 
+
+## tasknumber 4
+
+# no task 4 found in the assignment sheet
+
+
+
 ## tasknumber 5
 
 # Same number of shipments from A and B -> P_A = P_B = 0.5
@@ -68,28 +76,34 @@ P_A_given_Apos_and_defective = 0.8*(1/3) / (0.8*(1/3) + (1-0.65)*(2/3))
 P_A_given_Apos_and_defective
 
 
+
 # Bayesian Workflow
+
 ## tasknumber 6
+
+# 2/3 of the earth's surface are water -> 1/3 land
+# Peak of distribution at x = 1/3
+# Exclude 0 and 1 because 0% < proportion of land < 100% (strictly lower than)
 
 ## beta distribution
 # create density distribution
-range <- seq(0, 1, length.out = 100)
+range <- seq(0.01, 0.99, by = 0.01)
 d <- dbeta(range, shape1 = 2, shape2 = 4)
 BETA <- data.frame(range, d)
 
 # plot
 ggplot(BETA, aes(x = range, y = d)) +
-  geom_line(linewidth = 2) +
+  geom_line(linewidth = 1) +
   labs(x = "Proportion of land", 
        y = "Density") +
   theme_minimal()
 
-# 2/3 of the earth's surface are water -> 1/3 land
-# Peak of distribution at x = 1/3
+
 
 ## tasknumber 7
 
 sample <- rbeta(1e4,2,4)
+
 
 
 ## tasknumber 8
@@ -104,8 +118,9 @@ for (i in seq_along(prop)){
 poss <- tibble(prop_L = seq(0, 1, .1), prior = priors[1:11])
 
 # 26 out of 100 tosses landed on land
-likelihood <- dbinom(26, 100, poss$prop_L)
-posteriors <- likelihood * poss$prior / sum(likelihood * poss$prior)
+likelihood <- dbinom(26, 100, prob = poss$prop_L)
+poss$likelihood <- likelihood
+posteriors <- poss$likelihood * poss$prior / sum(poss$likelihood * poss$prior)
 poss$posterior <- posteriors
 poss
 
@@ -120,6 +135,6 @@ samples_posterior <- sample(c(poss$prop_L),1e3,replace=TRUE,prob=c(poss$posterio
 # Predict outcomes of 100 globe tosses
 prediction <- rbinom(length(samples_posterior),100,samples_posterior)
 
-hist(prediction,breaks=seq(-0.5,100.5),xlab="Number of lands",main="Posterior predictive distribution")
+hist(prediction,breaks=20,xlab="Number of lands",main="Posterior predictive distribution")
 
 
