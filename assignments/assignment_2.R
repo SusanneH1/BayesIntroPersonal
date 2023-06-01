@@ -16,7 +16,8 @@ library(tidyverse)
 ## tasknumber 1
 
 likelihood <- dbinom(6, 10, c(.7,.5,.8))
-prior <- c(1/3, 2/3, 1/3) # B receives reviews twice as likely as A and C
+#prior <- c(1/3, 2/3, 1/3) # B receives reviews twice as likely as A and as C
+prior <- c(1/4, 2/4, 1/4) # B receives reviews twice as likely as A and as C
 posteriors <- prior * likelihood / sum(prior * likelihood)
 # Posterior probability that the reviews are on Company A
 posteriors[1]
