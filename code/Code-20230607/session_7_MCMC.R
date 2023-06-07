@@ -76,7 +76,7 @@ dat <- list( # Stan requires a list of the data
   )
 
 # step 2 and 3: specify and fit the Stan model 
-m1shaq <- stan("code/Stan/session_7_m1shaq.stan", 
+m1shaq <- stan("code/Code-20230607/session_7_m1shaq.stan", 
                data=dat, 
                chains = 4, 
                cores = 4, 
@@ -92,7 +92,7 @@ traceplot(m1shaq)
 # Mediation / Pipe example
 
 # step 3: Fit the model
-m2shaq <- stan("code/Stan/session_7_m2shaq.stan", 
+m2shaq <- stan("code/Code-20230607/session_7_m2shaq.stan", 
                data=dat, 
                chains = 4, 
                cores = 4, 

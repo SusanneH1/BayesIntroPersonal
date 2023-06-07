@@ -24,7 +24,14 @@ plot(dat$age, dat$height)
 plot(dat$age, dat$weight)
 
 
-# regression
+# Regression
+
+# Choosing priors:
+
+# dnorm if both positive and negative values are possible and equally likely
+# dunif if min and max values are known
+# dbeta if min and max values are known and some values in the range are assumed to be more likely
+
 
 # weight ~ a + b*height
 # with mean-centering
@@ -62,7 +69,7 @@ m3 <- quap(
     mu <- a + b * (age-mu_a),
     a ~ dnorm(40, 7),
     b ~ dnorm(0, 3),
-    sd ~ dunif(0, 20)
+    sd ~ dunif(0, 20) #larger standard deviation due to greater deviations of weight when older than when taller
   ),
   data = dat)
 precis(m3)
