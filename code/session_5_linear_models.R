@@ -120,7 +120,7 @@ precis(m_fit)
 # Use model to analyze data
 
 ## load data
-shaq <- read_csv("data/shaq.csv")
+shaq <- read_csv('C:/Users/hantk/Documents/TUM/Semester 4 SS 2023/Introduction to Bayesian Data Analysis/BayesIntroPersonal/data/shaq.csv')
 
 ggplot(shaq, aes(x = PTS)) + 
   geom_histogram(fill = "#552583", alpha = .5, color = "#552583", bins = 30) + 
@@ -157,7 +157,7 @@ m_shaq_smp %>%  ggplot(aes(x = mu)) +
 PI(m_shaq_smp$mu)
 HPDI(m_shaq_smp$mu)
 
-PI(m_shaq_smp$mu)
+PI(m_shaq_smp$sigma)
 HPDI(m_shaq_smp$sigma)
 
 
