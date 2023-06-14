@@ -39,6 +39,7 @@ m1 <- ulam(
   ), data = dat_indicator, chains = 4, cores = 4
 )
 precis(m1)
+traceplot(m1) # check convergence
 
 
 # using index variables 
@@ -87,12 +88,16 @@ precis(m3, depth = 2)
 post <- extract.samples(m3)
 
 ### posterior means
-m_1 <- tibble(S = "1" , W = post$a[,1]) 
-m_2 <- tibble(S = "2" , W = post$a[,2]) 
-post_m <- bind_rows(m_1, m_2)
+m_1 <- tibble(S = "1" , W = post$a[,1]) # women
+m_2 <- tibble(S = "2" , W = post$a[,2]) # men
+post_m <- bind_rows(m_1, m_2) # join dataframes
 ggplot(post_m, aes(x = W, fill = S)) + 
   geom_density(alpha = .5) + 
   theme_minimal()
+
+# scatterplot
+ggplot(d_adult, aes(x = weight, y = height, color = male)) +
+  geom_point(alpha = .5)
 
 ### posterior predictions
 W_1 <- tibble(S = "1" , W = rnorm(1000, post$a[, 1], post$sigma)) 
