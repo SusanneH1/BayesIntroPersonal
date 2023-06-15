@@ -39,8 +39,8 @@ plt_densities <- ggplot(data_long, aes(x = value)) +
 plt_densities
 
 # Add new variable AG (1 = young, 2 = old)
-# Use median (46.5 years) as threshold
-data <- data %>% mutate(AG = if_else(Age>=46.5, 2, 1))
+# Use 50 years as threshold
+data <- data %>% mutate(AG = if_else(Age>=50, 2, 1))
 View(data)
 
 ##############################################
