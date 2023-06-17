@@ -39,8 +39,8 @@ plt_densities <- ggplot(data_long, aes(x = value)) +
 plt_densities
 
 # Add new variable AG (1 = young, 2 = old)
-# Use 50 years as threshold
-data <- data %>% mutate(AG = if_else(Age>=50, 2, 1))
+# Use median of age group as threshold
+data <- data %>% mutate(AG = if_else(Age>=median(Age), 2, 1))
 View(data)
 
 ##############################################
@@ -188,7 +188,7 @@ sim_rs_static <- function(N_dec, mu_dec, sd_dec){
   rnorm(N_dec, mu_dec, sd_dec)
 }
 
-rs_static <- tibble(rs = sim_rs_static(N_decisions, 0.45, 0.2))
+rs_static <- tibble(rs = sim_rs_static(N_decisions, 0.6, 0.3))
 ggplot(rs_static, aes(x = rs)) + 
   geom_histogram(fill = "#552583", 
                  alpha = .5, 
@@ -201,8 +201,8 @@ ggplot(rs_static, aes(x = rs)) +
 ## Fit model on simulated data
 
 m_desc_rs <- alist(rs ~ dnorm(mu, sigma),
-                mu ~ dnorm(0.45, 0.2),
-                sigma ~ dunif(0, 0.2))
+                mu ~ dnorm(0.6, 0.5),
+                sigma ~ dunif(0, 0.5))
 
 m_fit_rs <- quap(m_desc_rs, data=rs_static)
 
@@ -213,8 +213,8 @@ precis(m_fit_rs)
 # Fit model to data
 m_decisions_rs <- quap(
   alist(RiskSeeking ~ dnorm(mu, sigma),
-        mu ~ dnorm(0.6, 0.15),
-        sigma ~ dunif(0, 0.15)),
+        mu ~ dnorm(0.6, 0.5),
+        sigma ~ dunif(0, 0.5)),
   data = data)
 
 precis(m_decisions_rs)
@@ -239,11 +239,9 @@ m_dq_smp %>%  ggplot(aes(x = mu)) +
 
 # Posterior intervals 
 
-PI(m_dq_smp$mu)
-HPDI(m_dq_smp$mu)
+HPDI(m_dq_smp$mu, prob=0.95)
 
-PI(m_dq_smp$sigma)
-HPDI(m_dq_smp$sigma)
+HPDI(m_dq_smp$sigma, prob=0.95)
 
 
 ## RiskSeeking
@@ -258,27 +256,25 @@ m_rs_smp %>%  ggplot(aes(x = mu)) +
 
 # Posterior intervals 
 
-PI(m_rs_smp$mu)
-HPDI(m_rs_smp$mu)
+HPDI(m_rs_smp$mu, prob=0.95)
 
-PI(m_rs_smp$sigma)
-HPDI(m_rs_smp$sigma)
+HPDI(m_rs_smp$sigma, prob=0.95)
 
 
 ### Interpretation
 
 ## DecisionQuality
-# In 89%, the quality of decisions has a mean of 0.63-0.66 which means that participants 
-# took on average in 63-66% of their decisions the option with the highest expectation.
-# Since this value is greater than 50%, the decision quality is not too bad. However,
-# it is only slightly higher and thus confirming the assumption that humans have
-# problems to incorporate statistical knowledge into their thinking/decisions.
+# With 95% confidence, the quality of decisions has a mean of 0.63-0.66 which means  
+# that participants took on average in 63-66% of their decisions the option with 
+# the highest expectation. Since this value is greater than 50%, the decision quality 
+# is not too bad. However, it is only slightly higher and thus confirming the assumption 
+# that humans have problems to incorporate statistical knowledge into their thinking/decisions.
 
 ## RiskSeeking
-# In 89%, the risk seeking has a mean of 0.46-0.48 which means that participants took
-# on average in 46-48% of their decisions the safer option (option A). Since this 
-# value is less than 50%, the participants' risk attitude is rather low, i.e. the
-# average of the participants are risk-averse.
+# With 95% confidence, the risk seeking has a mean of 0.46-0.48 which means that 
+# participants took on average in 45-49% of their decisions the safer option (option A).  
+# Since this value is less than 50%, the participants' risk attitude is rather low, 
+# i.e. the average of the participants are risk-averse.
 
 
 # tasknumber 5
@@ -317,7 +313,7 @@ prior_pred %>% ggplot(aes(x = dq_young)) +
 
 ## Simulate fake data
 
-dq_static_young <- tibble(dq_young = sim_dq_static(N_decisions, 0.6, 0.1))
+dq_static_young <- tibble(dq_young = sim_dq_static(N_decisions, 0.6, 0.15))
 ggplot(dq_static_young, aes(x = dq_young)) + 
   geom_histogram(fill = "#552583", 
                  alpha = .5, 
@@ -433,7 +429,8 @@ m_smp_difference %>%  ggplot(aes(x = sigma)) +
        y = "Density") +
   theme_minimal()
 
-# -> mean of difference (m_smp_difference) < 0.02
+mean(m_smp_difference$mu)
+# -> mean of difference (m_smp_difference) very small
 # -> young and old people do not differ in decision quality on average
 # (decision quality of young people only very slightly better on average by 0.02)
 
@@ -446,7 +443,7 @@ m_smp_difference %>%  ggplot(aes(x = sigma)) +
 
 # standardize columns (except Age and AG)
 data_s <- data
-data_s[2 : 6] <- as.data.frame(scale(data_s[2 : 6]))
+data_s[1 : 6] <- as.data.frame(scale(data_s[1 : 6]))
 
 # check that
 colMeans(data_s[2:6]) #mean is zero
@@ -466,7 +463,7 @@ m_DQ_N <- quap(
     sd ~ dunif(0, 1) 
   ),
   data = data_s)
-precis(m_DQ_N)
+precis(m_DQ_N) #b=0.41
 
 
 # DecisionQuality ~ Speed
@@ -479,7 +476,7 @@ m_DQ_S <- quap(
     sd ~ dunif(0, 1) 
   ),
   data = data_s)
-precis(m_DQ_S)
+precis(m_DQ_S) #b=0.22
 
 
 # DecisionQuality ~ NegAffect
@@ -492,47 +489,47 @@ m_DQ_NA <- quap(
     sd ~ dunif(0, 1) 
   ),
   data = data_s)
-precis(m_DQ_NA)
+precis(m_DQ_NA) #b=-0.07
 
 
 
 # RiskSeeking ~ Numeracy
 m_RS_N <- quap(
   alist(
-    DecisionQuality ~ dnorm(mu, sd),
+    RiskSeeking ~ dnorm(mu, sd),
     mu <- a + b * Numeracy, 
     a ~ dnorm(0, 1), 
     b ~ dnorm(.5, .2), #good calculation skills might not have any influence on risk seeking behaviour
     sd ~ dunif(0, 1) 
   ),
   data = data_s)
-precis(m_RS_N)
+precis(m_RS_N) #b=-0.02
 
 
 # RiskSeeking ~ Speed
 m_RS_S <- quap(
   alist(
-    DecisionQuality ~ dnorm(mu, sd),
+    RiskSeeking ~ dnorm(mu, sd),
     mu <- a + b * Speed, 
     a ~ dnorm(0, 1), 
     b ~ dnorm(.5, .2), #high speed might might not have any influence on risk seeking behaviour
     sd ~ dunif(0, 1) 
   ),
   data = data_s)
-precis(m_RS_S)
+precis(m_RS_S) #b=-0.01
 
 
 # RiskSeeking ~ NegAffect
 m_RS_NA <- quap(
   alist(
-    DecisionQuality ~ dnorm(mu, sd),
+    RiskSeeking ~ dnorm(mu, sd),
     mu <- a + b * NegAffect, 
     a ~ dnorm(0, 1), 
     b ~ dnorm(.6, .2), #negative mood might lead to risk seeking behaviour
     sd ~ dunif(0, 1) 
   ),
   data = data_s)
-precis(m_RS_NA)
+precis(m_RS_NA) #b=-0.13
 
 
 # advantages of using standardized variables for this task
@@ -545,12 +542,12 @@ precis(m_RS_NA)
 
 # Which variable has, on average, the strongest total effect on DecisionQuality?
 
-# Numeracy
+# Numeracy (highest absolute b)
 
 
 # Which variable has, on average, the strongest total effect on RiskSeeking?
 
-# Numeracy
+# NegAffect (highest absolute b)
 
 
 
@@ -564,7 +561,7 @@ precis(m_RS_NA)
 # the higher Speed, the lower DecisionQuality
 # the higher Numeracy, the higher DecisionQuality
 
-# -> confounding effect: fork + mediation
+# -> confounding effect of Numeracy?
 
 #  Speed --(-)--> DecisionQuality
 #     ^                 ^
@@ -572,6 +569,15 @@ precis(m_RS_NA)
 #    (+)               (+)
 ##    |                 |
 #     ----  Numeracy ----
+
+# -> mediation effect of Speed?
+
+#  Numeracy --(+)--> DecisionQuality
+#     ^                 ^
+##    |                 |
+#    (+)               (-)
+##    |                 |
+#     -----  Speed  -----
 
 
 # model
@@ -589,8 +595,16 @@ m_DQ_S_N <- quap(
   data = data_s)
 precis(m_DQ_S_N)
 
-# assumption "the higher Speed, the lower DecisionQuality": not fulfilled (b_1 > 0)
-# assumption "the higher Numeracy, the higher DecisionQuality": fulfilled (b_2 > 0)
+# assumption "the higher Speed, the lower DecisionQuality": not fulfilled (b_1=0.11 > 0)
+# assumption "the higher Numeracy, the higher DecisionQuality": fulfilled (b_2=0.38 > 0)
 # assumption "the higher Numeracy, the higher Speed": not directly visible in the model results
+
+# Numerator a mediator between Speed and DecisionQuality: coefficient for Speed should decrease significantly
+# when Numeracy is included into the model
+# here: b=0.22 decreases to b_1=0.11 -> speaks for assumption
+
+# Speed a confounder between Numeracy and DecisionQuality: coefficient for Numeracy should change significantly
+# when Speed is included into the model
+# here: b=0.41 decreases to b_2=0.38 -> could speak for assumption (slight decrease)
 
 
